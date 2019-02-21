@@ -142,6 +142,10 @@
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "sachin-day2"
+		},
+		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://sachinkeyv1.vault.azure.net/"
 		}
 	},
 	"variables": {
@@ -1378,6 +1382,19 @@
 			"properties": {
 				"type": "SelfHosted",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVault_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVault_ls_properties_typeProperties_baseUrl')]"
+				}
 			},
 			"dependsOn": []
 		}

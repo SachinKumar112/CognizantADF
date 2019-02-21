@@ -143,6 +143,10 @@
 			"type": "string",
 			"defaultValue": "sachin-day2"
 		},
+		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://sachinkeyv1.vault.azure.net/"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -229,6 +233,9 @@
 					},
 					"adls_ls_properties_typeProperties_resourceGroupName": {
 						"value": "[parameters('adls_ls_properties_typeProperties_resourceGroupName')]"
+					},
+					"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureKeyVault_ls_properties_typeProperties_baseUrl')]"
 					},
 					"ADLS_Sales_properties_typeProperties_fileName": {
 						"value": "[parameters('ADLS_Sales_properties_typeProperties_fileName')]"

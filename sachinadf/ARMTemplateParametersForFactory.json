@@ -106,6 +106,9 @@
 		},
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"value": "sachin-day2"
+		},
+		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+			"value": "https://sachinkeyv1.vault.azure.net/"
 		}
 	}
 }
