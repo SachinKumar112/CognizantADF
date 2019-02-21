@@ -6,12 +6,92 @@
 			"type": "string",
 			"metadata": "Data Factory Name",
 			"defaultValue": "sachinadf"
+		},
+		"File_from_sqlvm_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "myfile1.txt"
+		},
+		"File_from_sqlvm_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": ""
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/File_from_sqlvm')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "File from C:/Temp/files",
+				"linkedServiceName": {
+					"referenceName": "File_sqlvm_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "FileShare",
+				"typeProperties": {
+					"fileName": "[parameters('File_from_sqlvm_properties_typeProperties_fileName')]",
+					"folderPath": "[parameters('File_from_sqlvm_properties_typeProperties_folderPath')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SQLServerTable_Categories')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServer_adventure",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "ProductCategoryID",
+						"type": "Int32"
+					},
+					{
+						"name": "Category"
+					}
+				],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SQLServerTables_Sales')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServer_adventure",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "OrderDate",
+						"type": "DateTime"
+					},
+					{
+						"name": "PurchaseOrderNumber",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "Decimal"
+					}
+				],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SourceDataset_po8')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -128,64 +208,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/copy_data_from_hive_sql')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy Data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "HiveSource"
-							},
-							"sink": {
-								"type": "SqlSink",
-								"writeBatchSize": 10000
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"columnMappings": {
-									"event_date": "EVENT_DATE",
-									"source": "SOURCE",
-									"event_id": "EVENT_ID",
-									"details": "DETAILS",
-									"level": "LEVEL"
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "Hive_part_log",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "sql_HIVESQLOUTPUT",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Copy data from filesytem to blob')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -231,7 +253,9 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/File_from_sqlvm')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Demo_Lookup_ForEach')]",
@@ -387,7 +411,10 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SQLServerTable_Categories')]",
+				"[concat(variables('factoryId'), '/datasets/SQLServerTables_Sales')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Demo_copy')]",

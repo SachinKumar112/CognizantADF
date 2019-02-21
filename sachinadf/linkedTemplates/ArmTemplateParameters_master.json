@@ -8,10 +8,16 @@
 		"AzureBlobStorage_ls_connectionString": {
 			"value": ""
 		},
+		"AzureDataLakeAnalytics_training_servicePrincipalKey": {
+			"value": ""
+		},
 		"AzureSqlDatabase_ls_connectionString": {
 			"value": ""
 		},
 		"File_sqlvm_ls_password": {
+			"value": ""
+		},
+		"Hive_ls_password": {
 			"value": ""
 		},
 		"SqlServer_adventure_connectionString": {
@@ -24,9 +30,6 @@
 			"value": ""
 		},
 		"adls_ls_servicePrincipalKey": {
-			"value": ""
-		},
-		"Hive_ls_password": {
 			"value": ""
 		},
 		"ADLS_Sales_properties_typeProperties_fileName": {
@@ -65,7 +68,25 @@
 		"adls_file_names_properties_typeProperties_folderPath": {
 			"value": "Sales"
 		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_accountName": {
+			"value": "sachinadla"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_servicePrincipalId": {
+			"value": "c93c9d66-93f1-4bb7-809b-096f48437739"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_tenant": {
+			"value": "55ec5b05-136c-45f4-8949-ff574aec06c3"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_subscriptionId": {
+			"value": "43e3fde3-5ffb-47fd-a311-785abe48364c"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName": {
+			"value": "Sachinrg"
+		},
 		"File_sqlvm_ls_properties_typeProperties_userId": {
+			"value": "sachin"
+		},
+		"Hive_ls_properties_typeProperties_username": {
 			"value": "sachin"
 		},
 		"Sqllocal_ls_properties_typeProperties_userName": {
@@ -85,9 +106,6 @@
 		},
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"value": "sachin-day2"
-		},
-		"Hive_ls_properties_typeProperties_username": {
-			"value": "sachin"
 		}
 	}
 }

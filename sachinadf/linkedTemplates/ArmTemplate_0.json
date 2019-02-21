@@ -11,17 +11,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage_ls'"
 		},
+		"AzureDataLakeAnalytics_training_servicePrincipalKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalKey' of 'AzureDataLakeAnalytics_training'"
+		},
 		"AzureSqlDatabase_ls_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase_ls'"
 		},
-		"adls_ls_servicePrincipalKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'servicePrincipalKey' of 'adls_ls'"
-		},
 		"Hive_ls_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'Hive_ls'"
+		},
+		"adls_ls_servicePrincipalKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalKey' of 'adls_ls'"
 		},
 		"File_sqlvm_ls_password": {
 			"type": "secureString",
@@ -38,6 +42,30 @@
 		"Sqllocal_ls_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'Sqllocal_ls'"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "sachinadla"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "c93c9d66-93f1-4bb7-809b-096f48437739"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "55ec5b05-136c-45f4-8949-ff574aec06c3"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "43e3fde3-5ffb-47fd-a311-785abe48364c"
+		},
+		"AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName": {
+			"type": "string",
+			"defaultValue": "Sachinrg"
+		},
+		"Hive_ls_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "sachin"
 		},
 		"adls_ls_properties_typeProperties_dataLakeStoreUri": {
 			"type": "string",
@@ -58,10 +86,6 @@
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "sachin-day2"
-		},
-		"Hive_ls_properties_typeProperties_username": {
-			"type": "string",
-			"defaultValue": "sachin"
 		},
 		"ADLS_Sales_properties_typeProperties_fileName": {
 			"type": "string",
@@ -110,14 +134,6 @@
 		"Sqllocal_ls_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "sachin"
-		},
-		"File_from_sqlvm_properties_typeProperties_fileName": {
-			"type": "string",
-			"defaultValue": "myfile1.txt"
-		},
-		"File_from_sqlvm_properties_typeProperties_folderPath": {
-			"type": "string",
-			"defaultValue": ""
 		}
 	},
 	"variables": {
@@ -138,6 +154,27 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeAnalytics_training')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDataLakeAnalytics",
+				"typeProperties": {
+					"accountName": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_accountName')]",
+					"servicePrincipalId": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeAnalytics_training_servicePrincipalKey')]"
+					},
+					"tenant": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_tenant')]",
+					"subscriptionId": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_subscriptionId')]",
+					"resourceGroupName": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase_ls')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -146,6 +183,31 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureSqlDatabase_ls_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Hive_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Hive",
+				"typeProperties": {
+					"host": "sachincls.azurehdinsight.net",
+					"port": 443,
+					"serverType": "HiveThriftServer",
+					"thriftTransportProtocol": "Binary",
+					"authenticationType": "WindowsAzureHDInsightService",
+					"serviceDiscoveryMode": false,
+					"useNativeQuery": false,
+					"username": "[parameters('Hive_ls_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('Hive_ls_password')]"
+					},
+					"enableSsl": false
 				}
 			},
 			"dependsOn": []
@@ -182,29 +244,42 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Hive_ls')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/usql_demo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "Hive",
-				"typeProperties": {
-					"host": "sachincls.azurehdinsight.net",
-					"port": 443,
-					"serverType": "HiveThriftServer",
-					"thriftTransportProtocol": "Binary",
-					"authenticationType": "WindowsAzureHDInsightService",
-					"serviceDiscoveryMode": false,
-					"useNativeQuery": false,
-					"username": "[parameters('Hive_ls_properties_typeProperties_username')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('Hive_ls_password')]"
-					},
-					"enableSsl": false
-				}
+				"activities": [
+					{
+						"name": "U-SQL1",
+						"type": "DataLakeAnalyticsU-SQL",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"scriptPath": "usql/USQL.txt",
+							"scriptLinkedService": {
+								"referenceName": "adls_ls",
+								"type": "LinkedServiceReference"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDataLakeAnalytics_training",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/adls_ls')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeAnalytics_training')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ADLS_Sales')]",
@@ -369,6 +444,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Hive_part_log')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Hive_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "HiveObject",
+				"structure": [
+					{
+						"name": "event_date",
+						"type": "DateTime"
+					},
+					{
+						"name": "source",
+						"type": "String"
+					},
+					{
+						"name": "event_id",
+						"type": "Int32"
+					},
+					{
+						"name": "details",
+						"type": "String"
+					},
+					{
+						"name": "level",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "`default`.`part_log`"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Hive_ls')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/adls_day2_ds')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -444,6 +560,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/sql_HIVESQLOUTPUT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"structure": [
+					{
+						"name": "EVENT_DATE",
+						"type": "DateTime"
+					},
+					{
+						"name": "SOURCE",
+						"type": "String"
+					},
+					{
+						"name": "EVENT_ID",
+						"type": "Int32"
+					},
+					{
+						"name": "DETAILS",
+						"type": "String"
+					},
+					{
+						"name": "LEVEL",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[HIVESQLOUTPUT]')]"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase_ls')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/File_sqlvm_ls')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -511,85 +668,64 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Hive_part_log')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/copy_data_from_hive_sql')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "Hive_ls",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "HiveObject",
-				"structure": [
+				"activities": [
 					{
-						"name": "event_date",
-						"type": "DateTime"
-					},
-					{
-						"name": "source",
-						"type": "String"
-					},
-					{
-						"name": "event_id",
-						"type": "Int32"
-					},
-					{
-						"name": "details",
-						"type": "String"
-					},
-					{
-						"name": "level",
-						"type": "String"
+						"name": "Copy Data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "HiveSource"
+							},
+							"sink": {
+								"type": "SqlSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"columnMappings": {
+									"event_date": "EVENT_DATE",
+									"source": "SOURCE",
+									"event_id": "EVENT_ID",
+									"details": "DETAILS",
+									"level": "LEVEL"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Hive_part_log",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sql_HIVESQLOUTPUT",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
-				"typeProperties": {
-					"tableName": "`default`.`part_log`"
-				}
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/Hive_ls')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/sql_HIVESQLOUTPUT')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_ls",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"structure": [
-					{
-						"name": "EVENT_DATE",
-						"type": "DateTime"
-					},
-					{
-						"name": "SOURCE",
-						"type": "String"
-					},
-					{
-						"name": "EVENT_ID",
-						"type": "Int32"
-					},
-					{
-						"name": "DETAILS",
-						"type": "String"
-					},
-					{
-						"name": "LEVEL",
-						"type": "String"
-					}
-				],
-				"typeProperties": {
-					"tableName": "[concat('[', 'dbo].[HIVESQLOUTPUT]')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase_ls')]"
+				"[concat(variables('factoryId'), '/datasets/Hive_part_log')]",
+				"[concat(variables('factoryId'), '/datasets/sql_HIVESQLOUTPUT')]"
 			]
 		},
 		{
@@ -647,84 +783,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/adls_ls')]",
 				"[concat(variables('factoryId'), '/datasets/adls_file_names')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/File_from_sqlvm')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "File from C:/Temp/files",
-				"linkedServiceName": {
-					"referenceName": "File_sqlvm_ls",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "FileShare",
-				"typeProperties": {
-					"fileName": "[parameters('File_from_sqlvm_properties_typeProperties_fileName')]",
-					"folderPath": "[parameters('File_from_sqlvm_properties_typeProperties_folderPath')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/File_sqlvm_ls')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SQLServerTable_Categories')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SqlServer_adventure",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"structure": [
-					{
-						"name": "ProductCategoryID",
-						"type": "Int32"
-					},
-					{
-						"name": "Category"
-					}
-				],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SqlServer_adventure')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SQLServerTables_Sales')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SqlServer_adventure",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"structure": [
-					{
-						"name": "OrderDate",
-						"type": "DateTime"
-					},
-					{
-						"name": "PurchaseOrderNumber",
-						"type": "String"
-					},
-					{
-						"name": "Amount",
-						"type": "Decimal"
-					}
-				],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SqlServer_adventure')]"
 			]
 		}
 	]
