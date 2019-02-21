@@ -1,0 +1,16 @@
+{
+	"name": "Sqllocal_ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=True;data source=Sachinsql2017;initial catalog=sqldb",
+			"userName": "sachin",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI5OTg2NThlNi05MmY5LTQ5M2ItYWEwZS02Y2ViOGM2OWYyNjkiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "SachinIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

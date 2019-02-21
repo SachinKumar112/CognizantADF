@@ -1,0 +1,20 @@
+{
+	"name": "SQLServerTable_Categories",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServer_adventure",
+			"type": "LinkedServiceReference"
+		},
+		"type": "SqlServerTable",
+		"structure": [
+			{
+				"name": "ProductCategoryID",
+				"type": "Int32"
+			},
+			{
+				"name": "Category"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
