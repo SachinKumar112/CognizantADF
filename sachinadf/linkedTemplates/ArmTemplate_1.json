@@ -7,6 +7,18 @@
 			"metadata": "Data Factory Name",
 			"defaultValue": "sachinadf"
 		},
+		"Sqllocal_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Sqllocal_ls'"
+		},
+		"Sqllocal_ls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Sqllocal_ls'"
+		},
+		"Sqllocal_ls_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sachin"
+		},
 		"File_from_sqlvm_properties_typeProperties_fileName": {
 			"type": "string",
 			"defaultValue": "myfile1.txt"
@@ -20,6 +32,86 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Sqllocal_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('Sqllocal_ls_connectionString')]",
+					"userName": "[parameters('Sqllocal_ls_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('Sqllocal_ls_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SachinIR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copy_data_from_hive_sql')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "HiveSource"
+							},
+							"sink": {
+								"type": "SqlSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"columnMappings": {
+									"event_date": "EVENT_DATE",
+									"source": "SOURCE",
+									"event_id": "EVENT_ID",
+									"details": "DETAILS",
+									"level": "LEVEL"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Hive_part_log",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sql_HIVESQLOUTPUT",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/web_activity_demo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -71,6 +163,23 @@
 					}
 				},
 				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_keyv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[HIVESQLOUTPUT]')]"
+				}
 			},
 			"dependsOn": []
 		},
@@ -187,7 +296,9 @@
 					"tableName": "[concat('[', 'dbo].[EmpDetails]')]"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sqllocal_ls')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SqlServerinpremisetable')]",
@@ -220,7 +331,9 @@
 				],
 				"typeProperties": {}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sqllocal_ls')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/blobtoSqlServer')]",
@@ -259,7 +372,9 @@
 					"tableName": "[concat('[', 'dbo].[employeeazure]')]"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sqllocal_ls')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Copy data from filesytem to blob')]",
@@ -589,6 +704,55 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/blobtoSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copytodemokeyvalut')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copyfromsqlazure",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlSource"
+							},
+							"sink": {
+								"type": "AzureDataLakeStoreSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureDataLakeStoreFiletodemokeyv",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
 			]
 		},
 		{

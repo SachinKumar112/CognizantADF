@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'servicePrincipalKey' of 'AzureDataLakeAnalytics_training'"
 		},
+		"AzureSqlDatabase_keyv_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase_keyv_ls'"
+		},
 		"AzureSqlDatabase_ls_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase_ls'"
@@ -67,6 +71,14 @@
 			"type": "string",
 			"defaultValue": "mfiles"
 		},
+		"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "hiveqloutput.txt"
+		},
+		"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "/keyv"
+		},
 		"File_from_sqlvm_properties_typeProperties_fileName": {
 			"type": "string",
 			"defaultValue": "myfile1.txt"
@@ -111,6 +123,10 @@
 			"type": "string",
 			"defaultValue": "Sachinrg"
 		},
+		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://sachinkeyv1.vault.azure.net/"
+		},
 		"File_sqlvm_ls_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "sachin"
@@ -142,10 +158,6 @@
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "sachin-day2"
-		},
-		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://sachinkeyv1.vault.azure.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -189,17 +201,14 @@
 					"adls_ls_servicePrincipalKey": {
 						"value": "[parameters('adls_ls_servicePrincipalKey')]"
 					},
+					"AzureSqlDatabase_keyv_ls_connectionString": {
+						"value": "[parameters('AzureSqlDatabase_keyv_ls_connectionString')]"
+					},
 					"File_sqlvm_ls_password": {
 						"value": "[parameters('File_sqlvm_ls_password')]"
 					},
 					"SqlServer_adventure_connectionString": {
 						"value": "[parameters('SqlServer_adventure_connectionString')]"
-					},
-					"Sqllocal_ls_connectionString": {
-						"value": "[parameters('Sqllocal_ls_connectionString')]"
-					},
-					"Sqllocal_ls_password": {
-						"value": "[parameters('Sqllocal_ls_password')]"
 					},
 					"AzureDataLakeAnalytics_training_properties_typeProperties_accountName": {
 						"value": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_accountName')]"
@@ -215,6 +224,9 @@
 					},
 					"AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName": {
 						"value": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName')]"
+					},
+					"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureKeyVault_ls_properties_typeProperties_baseUrl')]"
 					},
 					"Hive_ls_properties_typeProperties_username": {
 						"value": "[parameters('Hive_ls_properties_typeProperties_username')]"
@@ -234,9 +246,6 @@
 					"adls_ls_properties_typeProperties_resourceGroupName": {
 						"value": "[parameters('adls_ls_properties_typeProperties_resourceGroupName')]"
 					},
-					"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
-						"value": "[parameters('AzureKeyVault_ls_properties_typeProperties_baseUrl')]"
-					},
 					"ADLS_Sales_properties_typeProperties_fileName": {
 						"value": "[parameters('ADLS_Sales_properties_typeProperties_fileName')]"
 					},
@@ -255,6 +264,12 @@
 					"AzureBlobcsv_properties_typeProperties_folderPath": {
 						"value": "[parameters('AzureBlobcsv_properties_typeProperties_folderPath')]"
 					},
+					"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_fileName": {
+						"value": "[parameters('AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_fileName')]"
+					},
+					"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_folderPath": {
+						"value": "[parameters('AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_folderPath')]"
+					},
 					"adls_day2_ds_properties_typeProperties_fileName": {
 						"value": "[parameters('adls_day2_ds_properties_typeProperties_fileName')]"
 					},
@@ -269,9 +284,6 @@
 					},
 					"File_sqlvm_ls_properties_typeProperties_userId": {
 						"value": "[parameters('File_sqlvm_ls_properties_typeProperties_userId')]"
-					},
-					"Sqllocal_ls_properties_typeProperties_userName": {
-						"value": "[parameters('Sqllocal_ls_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -290,6 +302,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Sqllocal_ls_connectionString": {
+						"value": "[parameters('Sqllocal_ls_connectionString')]"
+					},
+					"Sqllocal_ls_password": {
+						"value": "[parameters('Sqllocal_ls_password')]"
+					},
+					"Sqllocal_ls_properties_typeProperties_userName": {
+						"value": "[parameters('Sqllocal_ls_properties_typeProperties_userName')]"
 					},
 					"File_from_sqlvm_properties_typeProperties_fileName": {
 						"value": "[parameters('File_from_sqlvm_properties_typeProperties_fileName')]"

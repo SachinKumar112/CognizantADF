@@ -27,6 +27,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'servicePrincipalKey' of 'adls_ls'"
 		},
+		"AzureSqlDatabase_keyv_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase_keyv_ls'"
+		},
 		"File_sqlvm_ls_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'File_sqlvm_ls'"
@@ -34,14 +38,6 @@
 		"SqlServer_adventure_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SqlServer_adventure'"
-		},
-		"Sqllocal_ls_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'Sqllocal_ls'"
-		},
-		"Sqllocal_ls_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'Sqllocal_ls'"
 		},
 		"AzureDataLakeAnalytics_training_properties_typeProperties_accountName": {
 			"type": "string",
@@ -62,6 +58,10 @@
 		"AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName": {
 			"type": "string",
 			"defaultValue": "Sachinrg"
+		},
+		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://sachinkeyv1.vault.azure.net/"
 		},
 		"Hive_ls_properties_typeProperties_username": {
 			"type": "string",
@@ -87,10 +87,6 @@
 			"type": "string",
 			"defaultValue": "sachin-day2"
 		},
-		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://sachinkeyv1.vault.azure.net/"
-		},
 		"ADLS_Sales_properties_typeProperties_fileName": {
 			"type": "string",
 			"defaultValue": "@concat('Sales_',item().Category,'.txt')"
@@ -115,6 +111,14 @@
 			"type": "string",
 			"defaultValue": "mfiles"
 		},
+		"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "hiveqloutput.txt"
+		},
+		"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "/keyv"
+		},
 		"adls_day2_ds_properties_typeProperties_fileName": {
 			"type": "string",
 			"defaultValue": "day2.txt"
@@ -132,10 +136,6 @@
 			"defaultValue": "Sales"
 		},
 		"File_sqlvm_ls_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "sachin"
-		},
-		"Sqllocal_ls_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "sachin"
 		}
@@ -174,6 +174,19 @@
 					"tenant": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_tenant')]",
 					"subscriptionId": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_subscriptionId')]",
 					"resourceGroupName": "[parameters('AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVault_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVault_ls_properties_typeProperties_baseUrl')]"
 				}
 			},
 			"dependsOn": []
@@ -244,19 +257,6 @@
 			"properties": {
 				"type": "SelfHosted",
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureKeyVault_ls')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('AzureKeyVault_ls_properties_typeProperties_baseUrl')]"
-				}
 			},
 			"dependsOn": []
 		},
@@ -413,6 +413,35 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStoreFiletodemokeyv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureDataLakeStoreFile",
+				"typeProperties": {
+					"format": {
+						"type": "TextFormat",
+						"columnDelimiter": ",",
+						"rowDelimiter": "",
+						"nullValue": "\\N",
+						"treatEmptyAsNull": true,
+						"skipLineCount": 0,
+						"firstRowAsHeader": false
+					},
+					"fileName": "[parameters('AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_fileName')]",
+					"folderPath": "[parameters('AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_folderPath')]"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/adls_ls')]"
 			]
 		},
 		{
@@ -618,6 +647,29 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase_keyv_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase_keyv_ls_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault_ls",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sqlazuresecret"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault_ls')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/File_sqlvm_ls')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -658,91 +710,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/SachinIR')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Sqllocal_ls')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('Sqllocal_ls_connectionString')]",
-					"userName": "[parameters('Sqllocal_ls_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('Sqllocal_ls_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SachinIR",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SachinIR')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/copy_data_from_hive_sql')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy Data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "HiveSource"
-							},
-							"sink": {
-								"type": "SqlSink",
-								"writeBatchSize": 10000
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"columnMappings": {
-									"event_date": "EVENT_DATE",
-									"source": "SOURCE",
-									"event_id": "EVENT_ID",
-									"details": "DETAILS",
-									"level": "LEVEL"
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "Hive_part_log",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "sql_HIVESQLOUTPUT",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Hive_part_log')]",
-				"[concat(variables('factoryId'), '/datasets/sql_HIVESQLOUTPUT')]"
 			]
 		}
 	]

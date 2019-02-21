@@ -11,6 +11,9 @@
 		"AzureDataLakeAnalytics_training_servicePrincipalKey": {
 			"value": ""
 		},
+		"AzureSqlDatabase_keyv_ls_connectionString": {
+			"value": ""
+		},
 		"AzureSqlDatabase_ls_connectionString": {
 			"value": ""
 		},
@@ -50,6 +53,12 @@
 		"AzureBlobcsv_properties_typeProperties_folderPath": {
 			"value": "mfiles"
 		},
+		"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_fileName": {
+			"value": "hiveqloutput.txt"
+		},
+		"AzureDataLakeStoreFiletodemokeyv_properties_typeProperties_folderPath": {
+			"value": "/keyv"
+		},
 		"File_from_sqlvm_properties_typeProperties_fileName": {
 			"value": "myfile1.txt"
 		},
@@ -83,6 +92,9 @@
 		"AzureDataLakeAnalytics_training_properties_typeProperties_resourceGroupName": {
 			"value": "Sachinrg"
 		},
+		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
+			"value": "https://sachinkeyv1.vault.azure.net/"
+		},
 		"File_sqlvm_ls_properties_typeProperties_userId": {
 			"value": "sachin"
 		},
@@ -106,9 +118,6 @@
 		},
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"value": "sachin-day2"
-		},
-		"AzureKeyVault_ls_properties_typeProperties_baseUrl": {
-			"value": "https://sachinkeyv1.vault.azure.net/"
 		}
 	}
 }
