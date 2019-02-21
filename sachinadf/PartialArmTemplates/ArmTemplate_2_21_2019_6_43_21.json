@@ -1,0 +1,942 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory Name",
+			"defaultValue": "sachinadf"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy data from filesytem to blob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Data to blob",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "FileSystemSource",
+								"recursive": true
+							},
+							"sink": {
+								"type": "BlobSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "File_from_sqlvm",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureBlob1",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/File_from_sqlvm')]",
+				"[concat(variables('factoryId'), '/datasets/AzureBlob1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Demo_Lookup_ForEach')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Pipeline to use locckup",
+				"activities": [
+					{
+						"name": "LookupCategories",
+						"type": "Lookup",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "SqlSource",
+								"sqlReaderStoredProcedureName": "[concat('[', 'Demo].[GetProductCategories]')]"
+							},
+							"dataset": {
+								"referenceName": "SQLServerTable_Categories",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachCategories",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupCategories",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupCategories').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "SalesFromSQLToADLS",
+									"type": "Copy",
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"typeProperties": {
+										"source": {
+											"type": "SqlSource",
+											"sqlReaderStoredProcedureName": "[concat('[', 'Demo].[GetSales]')]",
+											"storedProcedureParameters": {
+												"ProductCategory": {
+													"type": "String",
+													"value": {
+														"value": "@item().Category",
+														"type": "Expression"
+													}
+												}
+											}
+										},
+										"sink": {
+											"type": "AzureDataLakeStoreSink"
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"columnMappings": {
+												"OrderDate": "OrderDate",
+												"PurchaseOrderNumber": "PurchaseOrderNumber",
+												"Amount": "Amount"
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SQLServerTables_Sales",
+											"type": "DatasetReference"
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ADLS_Sales",
+											"type": "DatasetReference"
+										}
+									]
+								},
+								{
+									"name": "UpdateDetails",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "SalesFromSQLToADLS",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"typeProperties": {
+										"storedProcedureName": "[concat('[', 'Demo].[UpdateProcessingDetails]')]",
+										"storedProcedureParameters": {
+											"Duration": {
+												"value": {
+													"value": "@activity('SalesFromSQLToADLS').output.copyDuration",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"ProductCategory": {
+												"value": {
+													"value": "@item().Category",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "SqlServer_adventure",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SQLServerTable_Categories')]",
+				"[concat(variables('factoryId'), '/datasets/SQLServerTables_Sales')]",
+				"[concat(variables('factoryId'), '/datasets/ADLS_Sales')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Demo_copy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_po8",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "[concat('[', 'dbo].[EmpDetails]')]"
+							},
+							{
+								"name": "Destination",
+								"value": "[concat('[', 'dbo].[EmpDetails]')]"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "SqlSource"
+							},
+							"sink": {
+								"type": "SqlSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"columnMappings": {
+									"id": "id",
+									"first_name": "first_name",
+									"last_name": "last_name",
+									"email": "email",
+									"city": "city",
+									"gender": "gender"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceDataset_po8",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DestinationDataset_po8",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceDataset_po8')]",
+				"[concat(variables('factoryId'), '/datasets/DestinationDataset_po8')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/blobtosqlserver')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "blobtosqlserver",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "BlobSource",
+								"recursive": true
+							},
+							"sink": {
+								"type": "SqlSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureBlobcsv",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "blobtoSqlServer",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureBlobcsv')]",
+				"[concat(variables('factoryId'), '/datasets/blobtoSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/loadtoadls_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Data1",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "SqlSource",
+								"sqlReaderQuery": {
+									"value": "Select SalesOrderID, OrderDate, SubTotal, ModifiedDate from InPremiseSalesOrderHeader where Convert(date, ModifiedDate) = '@{formatDateTime(adddays(utcnow(), -1), 'yyyy-MM-dd' )}'\n",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "AzureDataLakeStoreSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerinpremisetable",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_day2_ds",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerinpremisetable')]",
+				"[concat(variables('factoryId'), '/datasets/adls_day2_ds')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/web_activity_demo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "FilesinAdls",
+						"description": "Provides the list of files in a ADLS path",
+						"type": "WebActivity",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://prod-40.eastus.logic.azure.com:443/workflows/9d22c909160f4c1898383203f6023231/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxMxgSQGJQDqumFs-wUMxXRFE7yXoF9y1WUyIhOTWSM",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"body": {
+								"filepath": "@pipeline().parameters.folderpath"
+							},
+							"linkedServices": [
+								{
+									"referenceName": "adls_ls",
+									"type": "LinkedServiceReference"
+								}
+							],
+							"datasets": [
+								{
+									"referenceName": "adls_file_names",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"folderpath": {
+						"type": "String",
+						"defaultValue": "/Sales"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_file_names')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_Sales')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureDataLakeStoreFile",
+				"structure": [
+					{
+						"name": "OrderDate",
+						"type": "DateTime"
+					},
+					{
+						"name": "PurchaseOrderNumber",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "Decimal"
+					}
+				],
+				"typeProperties": {
+					"format": {
+						"type": "TextFormat",
+						"columnDelimiter": ",",
+						"rowDelimiter": "",
+						"nullValue": "\\N",
+						"treatEmptyAsNull": true,
+						"skipLineCount": 0,
+						"firstRowAsHeader": false
+					},
+					"fileName": {
+						"value": "@concat('Sales_',item().Category,'.txt')",
+						"type": "Expression"
+					},
+					"folderPath": "/Sales"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlob1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureBlob",
+				"typeProperties": {
+					"fileName": "",
+					"folderPath": "files"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobcsv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureBlob",
+				"structure": [
+					{
+						"name": "id",
+						"type": "String"
+					},
+					{
+						"name": "first_name",
+						"type": "String"
+					},
+					{
+						"name": "last_name",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					},
+					{
+						"name": "companyname",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"format": {
+						"type": "TextFormat",
+						"columnDelimiter": ",",
+						"rowDelimiter": "",
+						"nullValue": "\\N",
+						"treatEmptyAsNull": true,
+						"skipLineCount": 0,
+						"firstRowAsHeader": true
+					},
+					"fileName": "",
+					"folderPath": "mfiles"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DestinationDataset_po8')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureSqlTable",
+				"structure": [
+					{
+						"name": "id",
+						"type": "Int32"
+					},
+					{
+						"name": "first_name",
+						"type": "String"
+					},
+					{
+						"name": "last_name",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[EmpDetails]')]"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/File_from_sqlvm')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "File from C:/Temp/files",
+				"linkedServiceName": {
+					"referenceName": "File_sqlvm_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "FileShare",
+				"typeProperties": {
+					"fileName": "myfile1.txt",
+					"folderPath": ""
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SQLServerTable_Categories')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServer_adventure",
+					"type": "LinkedServiceReference"
+				},
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "ProductCategoryID",
+						"type": "Int32"
+					},
+					{
+						"name": "Category"
+					}
+				]
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SQLServerTables_Sales')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServer_adventure",
+					"type": "LinkedServiceReference"
+				},
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "OrderDate",
+						"type": "DateTime"
+					},
+					{
+						"name": "PurchaseOrderNumber",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "Decimal"
+					}
+				]
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataset_po8')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sqllocal_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "id",
+						"type": "Int32"
+					},
+					{
+						"name": "first_name",
+						"type": "String"
+					},
+					{
+						"name": "last_name",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[EmpDetails]')]"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerinpremisetable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sqllocal_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "SalesOrderID",
+						"type": "Int32"
+					},
+					{
+						"name": "OrderDate",
+						"type": "DateTime"
+					},
+					{
+						"name": "SubTotal",
+						"type": "String"
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "DateTime"
+					}
+				]
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_day2_ds')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureDataLakeStoreFile",
+				"structure": [
+					{
+						"name": "SalesordeID"
+					},
+					{
+						"name": "orderdate"
+					},
+					{
+						"name": "subtotal"
+					},
+					{
+						"name": "modifieddate"
+					}
+				],
+				"typeProperties": {
+					"format": {
+						"type": "TextFormat",
+						"columnDelimiter": "|",
+						"rowDelimiter": "",
+						"nullValue": "\\N",
+						"treatEmptyAsNull": true,
+						"skipLineCount": 0,
+						"firstRowAsHeader": false
+					},
+					"fileName": "day2.txt",
+					"folderPath": {
+						"value": "/@{formatDateTime(adddays(utcnow(), -1), 'yyyy')}/@{formatDateTime(adddays(utcnow(), -1), 'MM')}/@{formatDateTime(adddays(utcnow(), -1), 'dd')}",
+						"type": "Expression"
+					}
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_file_names')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureDataLakeStoreFile",
+				"typeProperties": {
+					"format": {
+						"type": "TextFormat",
+						"columnDelimiter": ",",
+						"rowDelimiter": "",
+						"nullValue": "\\N",
+						"treatEmptyAsNull": true,
+						"skipLineCount": 0,
+						"firstRowAsHeader": false
+					},
+					"fileName": "filelist.txt",
+					"folderPath": "Sales"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/blobtoSqlServer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sqllocal_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "SqlServerTable",
+				"structure": [
+					{
+						"name": "id",
+						"type": "Int32"
+					},
+					{
+						"name": "first_name",
+						"type": "String"
+					},
+					{
+						"name": "last_name",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					},
+					{
+						"name": "companyname",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[employeeazure]')]"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copy_data_from_hive_sql')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Data1",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "HiveSource"
+							},
+							"sink": {
+								"type": "SqlSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"columnMappings": {
+									"event_date": "EVENT_DATE",
+									"source": "SOURCE",
+									"event_id": "EVENT_ID",
+									"details": "DETAILS",
+									"level": "LEVEL"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Hive_part_log",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sql_HIVESQLOUTPUT",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Hive_part_log')]",
+				"[concat(variables('factoryId'), '/datasets/sql_HIVESQLOUTPUT')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Hive_part_log')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Hive_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "HiveObject",
+				"structure": [
+					{
+						"name": "event_date",
+						"type": "DateTime"
+					},
+					{
+						"name": "source",
+						"type": "String"
+					},
+					{
+						"name": "event_id",
+						"type": "Int32"
+					},
+					{
+						"name": "details",
+						"type": "String"
+					},
+					{
+						"name": "level",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "`default`.`part_log`"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sql_HIVESQLOUTPUT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_ls",
+					"type": "LinkedServiceReference"
+				},
+				"type": "AzureSqlTable",
+				"structure": [
+					{
+						"name": "EVENT_DATE",
+						"type": "DateTime"
+					},
+					{
+						"name": "SOURCE",
+						"type": "String"
+					},
+					{
+						"name": "EVENT_ID",
+						"type": "Int32"
+					},
+					{
+						"name": "DETAILS",
+						"type": "String"
+					},
+					{
+						"name": "LEVEL",
+						"type": "String"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[HIVESQLOUTPUT]')]"
+				}
+			}
+		}
+	]
+}

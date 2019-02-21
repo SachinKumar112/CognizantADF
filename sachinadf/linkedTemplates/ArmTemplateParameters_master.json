@@ -1,0 +1,93 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "sachinadf"
+		},
+		"AzureBlobStorage_ls_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase_ls_connectionString": {
+			"value": ""
+		},
+		"File_sqlvm_ls_password": {
+			"value": ""
+		},
+		"SqlServer_adventure_connectionString": {
+			"value": ""
+		},
+		"Sqllocal_ls_connectionString": {
+			"value": ""
+		},
+		"Sqllocal_ls_password": {
+			"value": ""
+		},
+		"adls_ls_servicePrincipalKey": {
+			"value": ""
+		},
+		"Hive_ls_password": {
+			"value": ""
+		},
+		"ADLS_Sales_properties_typeProperties_fileName": {
+			"value": "@concat('Sales_',item().Category,'.txt')"
+		},
+		"ADLS_Sales_properties_typeProperties_folderPath": {
+			"value": "/Sales"
+		},
+		"AzureBlob1_properties_typeProperties_fileName": {
+			"value": ""
+		},
+		"AzureBlob1_properties_typeProperties_folderPath": {
+			"value": "files"
+		},
+		"AzureBlobcsv_properties_typeProperties_fileName": {
+			"value": ""
+		},
+		"AzureBlobcsv_properties_typeProperties_folderPath": {
+			"value": "mfiles"
+		},
+		"File_from_sqlvm_properties_typeProperties_fileName": {
+			"value": "myfile1.txt"
+		},
+		"File_from_sqlvm_properties_typeProperties_folderPath": {
+			"value": ""
+		},
+		"adls_day2_ds_properties_typeProperties_fileName": {
+			"value": "day2.txt"
+		},
+		"adls_day2_ds_properties_typeProperties_folderPath": {
+			"value": "/@{formatDateTime(adddays(utcnow(), -1), 'yyyy')}/@{formatDateTime(adddays(utcnow(), -1), 'MM')}/@{formatDateTime(adddays(utcnow(), -1), 'dd')}"
+		},
+		"adls_file_names_properties_typeProperties_fileName": {
+			"value": "filelist.txt"
+		},
+		"adls_file_names_properties_typeProperties_folderPath": {
+			"value": "Sales"
+		},
+		"File_sqlvm_ls_properties_typeProperties_userId": {
+			"value": "sachin"
+		},
+		"Sqllocal_ls_properties_typeProperties_userName": {
+			"value": "sachin"
+		},
+		"adls_ls_properties_typeProperties_dataLakeStoreUri": {
+			"value": "https://sachinadls1.azuredatalakestore.net/webhdfs/v1"
+		},
+		"adls_ls_properties_typeProperties_servicePrincipalId": {
+			"value": "f1f66428-1726-485c-9f29-aadba424dbfe"
+		},
+		"adls_ls_properties_typeProperties_tenant": {
+			"value": "55ec5b05-136c-45f4-8949-ff574aec06c3"
+		},
+		"adls_ls_properties_typeProperties_subscriptionId": {
+			"value": "43e3fde3-5ffb-47fd-a311-785abe48364c"
+		},
+		"adls_ls_properties_typeProperties_resourceGroupName": {
+			"value": "sachin-day2"
+		},
+		"Hive_ls_properties_typeProperties_username": {
+			"value": "sachin"
+		}
+	}
+}

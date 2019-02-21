@@ -1,0 +1,258 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory Name",
+			"defaultValue": "sachinadf"
+		},
+		"AzureBlobStorage_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage_ls'"
+		},
+		"AzureSqlDatabase_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase_ls'"
+		},
+		"File_sqlvm_ls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'File_sqlvm_ls'"
+		},
+		"SqlServer_adventure_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SqlServer_adventure'"
+		},
+		"Sqllocal_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Sqllocal_ls'"
+		},
+		"Sqllocal_ls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Sqllocal_ls'"
+		},
+		"adls_ls_servicePrincipalKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalKey' of 'adls_ls'"
+		},
+		"Hive_ls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Hive_ls'"
+		},
+		"ADLS_Sales_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "@concat('Sales_',item().Category,'.txt')"
+		},
+		"ADLS_Sales_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "/Sales"
+		},
+		"AzureBlob1_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": ""
+		},
+		"AzureBlob1_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "files"
+		},
+		"AzureBlobcsv_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": ""
+		},
+		"AzureBlobcsv_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "mfiles"
+		},
+		"File_from_sqlvm_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "myfile1.txt"
+		},
+		"File_from_sqlvm_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": ""
+		},
+		"adls_day2_ds_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "day2.txt"
+		},
+		"adls_day2_ds_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "/@{formatDateTime(adddays(utcnow(), -1), 'yyyy')}/@{formatDateTime(adddays(utcnow(), -1), 'MM')}/@{formatDateTime(adddays(utcnow(), -1), 'dd')}"
+		},
+		"adls_file_names_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "filelist.txt"
+		},
+		"adls_file_names_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "Sales"
+		},
+		"File_sqlvm_ls_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "sachin"
+		},
+		"Sqllocal_ls_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sachin"
+		},
+		"adls_ls_properties_typeProperties_dataLakeStoreUri": {
+			"type": "string",
+			"defaultValue": "https://sachinadls1.azuredatalakestore.net/webhdfs/v1"
+		},
+		"adls_ls_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "f1f66428-1726-485c-9f29-aadba424dbfe"
+		},
+		"adls_ls_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "55ec5b05-136c-45f4-8949-ff574aec06c3"
+		},
+		"adls_ls_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "43e3fde3-5ffb-47fd-a311-785abe48364c"
+		},
+		"adls_ls_properties_typeProperties_resourceGroupName": {
+			"type": "string",
+			"defaultValue": "sachin-day2"
+		},
+		"Hive_ls_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "sachin"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas Token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorage_ls_connectionString": {
+						"value": "[parameters('AzureBlobStorage_ls_connectionString')]"
+					},
+					"AzureSqlDatabase_ls_connectionString": {
+						"value": "[parameters('AzureSqlDatabase_ls_connectionString')]"
+					},
+					"adls_ls_servicePrincipalKey": {
+						"value": "[parameters('adls_ls_servicePrincipalKey')]"
+					},
+					"Hive_ls_password": {
+						"value": "[parameters('Hive_ls_password')]"
+					},
+					"File_sqlvm_ls_password": {
+						"value": "[parameters('File_sqlvm_ls_password')]"
+					},
+					"SqlServer_adventure_connectionString": {
+						"value": "[parameters('SqlServer_adventure_connectionString')]"
+					},
+					"Sqllocal_ls_connectionString": {
+						"value": "[parameters('Sqllocal_ls_connectionString')]"
+					},
+					"Sqllocal_ls_password": {
+						"value": "[parameters('Sqllocal_ls_password')]"
+					},
+					"adls_ls_properties_typeProperties_dataLakeStoreUri": {
+						"value": "[parameters('adls_ls_properties_typeProperties_dataLakeStoreUri')]"
+					},
+					"adls_ls_properties_typeProperties_servicePrincipalId": {
+						"value": "[parameters('adls_ls_properties_typeProperties_servicePrincipalId')]"
+					},
+					"adls_ls_properties_typeProperties_tenant": {
+						"value": "[parameters('adls_ls_properties_typeProperties_tenant')]"
+					},
+					"adls_ls_properties_typeProperties_subscriptionId": {
+						"value": "[parameters('adls_ls_properties_typeProperties_subscriptionId')]"
+					},
+					"adls_ls_properties_typeProperties_resourceGroupName": {
+						"value": "[parameters('adls_ls_properties_typeProperties_resourceGroupName')]"
+					},
+					"Hive_ls_properties_typeProperties_username": {
+						"value": "[parameters('Hive_ls_properties_typeProperties_username')]"
+					},
+					"ADLS_Sales_properties_typeProperties_fileName": {
+						"value": "[parameters('ADLS_Sales_properties_typeProperties_fileName')]"
+					},
+					"ADLS_Sales_properties_typeProperties_folderPath": {
+						"value": "[parameters('ADLS_Sales_properties_typeProperties_folderPath')]"
+					},
+					"AzureBlob1_properties_typeProperties_fileName": {
+						"value": "[parameters('AzureBlob1_properties_typeProperties_fileName')]"
+					},
+					"AzureBlob1_properties_typeProperties_folderPath": {
+						"value": "[parameters('AzureBlob1_properties_typeProperties_folderPath')]"
+					},
+					"AzureBlobcsv_properties_typeProperties_fileName": {
+						"value": "[parameters('AzureBlobcsv_properties_typeProperties_fileName')]"
+					},
+					"AzureBlobcsv_properties_typeProperties_folderPath": {
+						"value": "[parameters('AzureBlobcsv_properties_typeProperties_folderPath')]"
+					},
+					"adls_day2_ds_properties_typeProperties_fileName": {
+						"value": "[parameters('adls_day2_ds_properties_typeProperties_fileName')]"
+					},
+					"adls_day2_ds_properties_typeProperties_folderPath": {
+						"value": "[parameters('adls_day2_ds_properties_typeProperties_folderPath')]"
+					},
+					"adls_file_names_properties_typeProperties_fileName": {
+						"value": "[parameters('adls_file_names_properties_typeProperties_fileName')]"
+					},
+					"adls_file_names_properties_typeProperties_folderPath": {
+						"value": "[parameters('adls_file_names_properties_typeProperties_folderPath')]"
+					},
+					"File_sqlvm_ls_properties_typeProperties_userId": {
+						"value": "[parameters('File_sqlvm_ls_properties_typeProperties_userId')]"
+					},
+					"Sqllocal_ls_properties_typeProperties_userName": {
+						"value": "[parameters('Sqllocal_ls_properties_typeProperties_userName')]"
+					},
+					"File_from_sqlvm_properties_typeProperties_fileName": {
+						"value": "[parameters('File_from_sqlvm_properties_typeProperties_fileName')]"
+					},
+					"File_from_sqlvm_properties_typeProperties_folderPath": {
+						"value": "[parameters('File_from_sqlvm_properties_typeProperties_folderPath')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
+		}
+	]
+}
