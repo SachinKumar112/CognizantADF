@@ -1,0 +1,50 @@
+{
+	"name": "copy_data_from_hive_sql",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Data1",
+				"type": "Copy",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "HiveSource"
+					},
+					"sink": {
+						"type": "SqlSink",
+						"writeBatchSize": 10000
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"columnMappings": {
+							"event_date": "EVENT_DATE",
+							"source": "SOURCE",
+							"event_id": "EVENT_ID",
+							"details": "DETAILS",
+							"level": "LEVEL"
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Hive_part_log",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "sql_HIVESQLOUTPUT",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		]
+	}
+}

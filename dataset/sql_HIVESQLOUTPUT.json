@@ -1,0 +1,35 @@
+{
+	"name": "sql_HIVESQLOUTPUT",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase_ls",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"structure": [
+			{
+				"name": "EVENT_DATE",
+				"type": "DateTime"
+			},
+			{
+				"name": "SOURCE",
+				"type": "String"
+			},
+			{
+				"name": "EVENT_ID",
+				"type": "Int32"
+			},
+			{
+				"name": "DETAILS",
+				"type": "String"
+			},
+			{
+				"name": "LEVEL",
+				"type": "String"
+			}
+		],
+		"typeProperties": {
+			"tableName": "[dbo].[HIVESQLOUTPUT]"
+		}
+	}
+}

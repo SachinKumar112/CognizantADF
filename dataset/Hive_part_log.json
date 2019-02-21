@@ -1,0 +1,35 @@
+{
+	"name": "Hive_part_log",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Hive_ls",
+			"type": "LinkedServiceReference"
+		},
+		"type": "HiveObject",
+		"structure": [
+			{
+				"name": "event_date",
+				"type": "DateTime"
+			},
+			{
+				"name": "source",
+				"type": "String"
+			},
+			{
+				"name": "event_id",
+				"type": "Int32"
+			},
+			{
+				"name": "details",
+				"type": "String"
+			},
+			{
+				"name": "level",
+				"type": "String"
+			}
+		],
+		"typeProperties": {
+			"tableName": "`default`.`part_log`"
+		}
+	}
+}
