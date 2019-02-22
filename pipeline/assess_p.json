@@ -1,0 +1,39 @@
+{
+	"name": "assess_p",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copyfromsqlserver",
+				"type": "Copy",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource"
+					},
+					"sink": {
+						"type": "AzureDataLakeStoreSink"
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "SqlServerTable1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureDataLakeStoreFile_product",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		]
+	}
+}
