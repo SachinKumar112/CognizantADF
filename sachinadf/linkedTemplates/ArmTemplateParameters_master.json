@@ -118,6 +118,9 @@
 		},
 		"adls_ls_properties_typeProperties_resourceGroupName": {
 			"value": "sachin-day2"
+		},
+		"AzureDataLakeStoreFile_product_properties_typeProperties_fileName": {
+			"value": "staging.csv"
 		}
 	}
 }

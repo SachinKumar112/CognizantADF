@@ -159,6 +159,10 @@
 			"type": "string",
 			"defaultValue": "sachin-day2"
 		},
+		"AzureDataLakeStoreFile_product_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "staging.csv"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -311,6 +315,9 @@
 					},
 					"Sqllocal_ls_properties_typeProperties_userName": {
 						"value": "[parameters('Sqllocal_ls_properties_typeProperties_userName')]"
+					},
+					"AzureDataLakeStoreFile_product_properties_typeProperties_fileName": {
+						"value": "[parameters('AzureDataLakeStoreFile_product_properties_typeProperties_fileName')]"
 					},
 					"File_from_sqlvm_properties_typeProperties_fileName": {
 						"value": "[parameters('File_from_sqlvm_properties_typeProperties_fileName')]"
