@@ -6,6 +6,16 @@
 			"type": "LinkedServiceReference"
 		},
 		"type": "SqlServerTable",
+		"structure": [
+			{
+				"name": "ProductID",
+				"type": "Int32"
+			},
+			{
+				"name": "ListPrice",
+				"type": "Decimal"
+			}
+		],
 		"typeProperties": {
 			"tableName": "[Production].[Product]"
 		}
